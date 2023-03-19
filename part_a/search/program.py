@@ -34,19 +34,33 @@ def move(board: dict[tuple, tuple], pos, direction) -> tuple:
 
     return (new_r, new_q)
 
-def update(board: dict[tuple, tuple], pos, move_direction = None) -> dict[tuple, tuple]:
+def update(board: dict[tuple, tuple], pos, move_direction = None, spread=False) -> dict[tuple, tuple]:
     """
     Update the game board after token movement.
     """
     token = board[pos]
     colour, power = token
+    if spread:
+        power = 1
     d_pos = move(board, pos, move_direction)
     if d_pos in board:
         d_token = board[d_pos]
         d_power = d_token[1]
         power += d_power
-    board.pop(pos)
+    if not spread:
+        board.pop(pos)
     board[d_pos] = (colour, power)
+
+def spread(board: dict[tuple, tuple], pos, move_direction):
+    token = board[pos]
+    power = token[1]
+    curr_pos = pos
+    for i in range(power):
+        new_pos = move(board, curr_pos, move_direction)
+        update(board, curr_pos, move_direction, True)
+        curr_pos = new_pos
+    board.pop(pos)
+
 
 
 def search(input: dict[tuple, tuple]) -> list[tuple]:

@@ -6,6 +6,7 @@ from .program import search
 from .program import move
 from .program import update
 from .program import Direction
+from .program import spread
 from .utils import render_board
 
 # WARNING: Do *not* modify any of the code in this file, and submit it as is!
@@ -49,6 +50,12 @@ def main():
     print_sequence(sequence)
     # test move and update:
     # update(input, (5, 6), Direction.UP)
+    # update(input, (6, 5), Direction.UP_RIGHT)
+    # update(input, (0, 5), Direction.UP)
+    # print(render_board(input, ansi=False))
+
+    # test spread:
+    # spread(input, (1,3), Direction.DOWN_RIGHT)
     # print(render_board(input, ansi=False))
 
 if __name__ == "__main__":
