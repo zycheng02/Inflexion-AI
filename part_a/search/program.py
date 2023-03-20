@@ -61,7 +61,21 @@ def spread(board: dict[tuple, tuple], pos, move_direction):
         curr_pos = new_pos
     board.pop(pos)
 
-
+def check_fin(board: dict[tuple, tuple], colour = None):
+    if colour:
+        win_colour = colour
+    if board != None:
+        tokens = list(board.values())
+        win_colour = tokens[0][0]
+        for i in tokens:
+            if i[0] != win_colour:
+                return False
+    if colour:
+        if colour == win_colour:
+            return True
+        else:
+            return False
+    return win_colour
 
 def search(input: dict[tuple, tuple]) -> list[tuple]:
     """

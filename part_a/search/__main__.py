@@ -7,6 +7,7 @@ from .program import move
 from .program import update
 from .program import Direction
 from .program import spread
+from .program import check_fin
 from .utils import render_board
 
 # WARNING: Do *not* modify any of the code in this file, and submit it as is!
@@ -53,10 +54,14 @@ def main():
     # update(input, (6, 5), Direction.UP_RIGHT)
     # update(input, (0, 5), Direction.UP)
     # print(render_board(input, ansi=False))
+    # print(check_fin(input))
 
     # test spread:
     # spread(input, (1,3), Direction.DOWN_RIGHT)
     # print(render_board(input, ansi=False))
+    # print(check_fin(input))
+    # print(check_fin(input, "r"))
+    # print(check_fin(input, "b"))
 
 if __name__ == "__main__":
     main()
