@@ -50,18 +50,18 @@ def main():
     sequence: list[tuple] = search(input)
     print_sequence(sequence)
     # test move and update:
-    # update(input, (5, 6), Direction.UP)
-    # update(input, (6, 5), Direction.UP_RIGHT)
-    # update(input, (0, 5), Direction.UP)
-    # print(render_board(input, ansi=False))
-    # print(check_fin(input))
+    n_input = update(input, (5, 6), Direction.UP)
+    print(render_board(input, ansi=False))
+    n_input = update(n_input, (6, 5), Direction.UP_RIGHT)
+    n_input = update(n_input, (0, 5), Direction.UP)
+    print(render_board(n_input, ansi=False))
+    print(render_board(input, ansi=False))
+    print(check_fin(n_input))
 
     # test spread:
-    # spread(input, (1,3), Direction.DOWN_RIGHT)
-    # print(render_board(input, ansi=False))
-    # print(check_fin(input))
-    # print(check_fin(input, "r"))
-    # print(check_fin(input, "b"))
+    n_input = spread(n_input, (1,3), Direction.DOWN_RIGHT)
+    print(render_board(n_input, ansi=False))
+    print(check_fin(n_input))
 
 if __name__ == "__main__":
     main()
