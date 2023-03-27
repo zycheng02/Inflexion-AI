@@ -74,6 +74,31 @@ def check_fin(board: dict[tuple, tuple]):
                 return False
     return win_colour
 
+def possible_actions(board: dict[tuple, tuple], colour):
+    list_actions = []
+    for token in board:
+        curr_colour = board[token][0]
+        if curr_colour == colour:
+            for direction in Direction:
+                list_actions.append((token, direction))
+    return list_actions
+
+def num_of_opponents(board: dict[tuple, tuple], colour = 'b'):
+    count = 0
+    for token in board.values():
+        if token[0] == colour:
+            count += 1
+    return count
+
+def calc_heuristics(board: dict[tuple, tuple], list_actions):
+    heuristics = {}
+    for action in list_actions:
+        pos, direction = action
+        new_board = spread(board, pos, direction)
+        h = num_of_opponents(new_board)
+        heuristics[action] = h
+    return heuristics
+
 def search(input: dict[tuple, tuple]) -> list[tuple]:
     """
     This is the entry point for your submission. The input is a dictionary
