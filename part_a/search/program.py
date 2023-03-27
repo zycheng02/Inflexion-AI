@@ -86,7 +86,7 @@ def check_fin(board: dict[tuple, tuple]):
                 return False
     return win_colour
 
-def search(input: dict[tuple, tuple]) -> list[tuple]:
+def search(board: dict[tuple, tuple]) -> list[tuple]:
     """
     This is the entry point for your submission. The input is a dictionary
     of board cell states, where the keys are tuples of (r, q) coordinates, and
@@ -96,11 +96,19 @@ def search(input: dict[tuple, tuple]) -> list[tuple]:
     See the specification document for more details.
     """
     # Create start node list
-    start_node_list=
+    start_node_list = []
+    tokens = list(board.values())
+        win_colour = tokens[0][0]
+        for i in tokens:
+            if i[0] == win_colour:
+                node = Node(self,Null,i[0])
+                start_node_list.append()
     # Initialize both open and closed list
-
+    open_list=[]
+    closed_list=[]
     # Add the start node
-
+    for node in start_node_list:
+        open_list.append(node)
     # Loop until you find the end
 
         # get the current node
