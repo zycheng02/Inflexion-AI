@@ -12,6 +12,18 @@ class Direction(Enum):
     DOWN_LEFT = (-1, 0)
     UP_LEFT = (0, -1)
 
+class Node():
+    """A node class for A* Pathfinding"""
+    def __init__(self, parent=None, position=None):
+        self.parent = parent
+        self.position = position
+        self.g = 0
+        self.h = 0
+        self.f = 0
+    def __eq__(self, other):
+        return self.position == other.position
+
+
 def move(board: dict[tuple, tuple], pos, direction) -> tuple:
     """
     Compute the end coordinates of the token movement towards given direction.
@@ -83,6 +95,16 @@ def search(input: dict[tuple, tuple]) -> list[tuple]:
 
     See the specification document for more details.
     """
+    # Create start node list
+    start_node_list=
+    # Initialize both open and closed list
+
+    # Add the start node
+
+    # Loop until you find the end
+
+        # get the current node
+
 
     # The render_board function is useful for debugging -- it will print out a 
     # board state in a human-readable format. Try changing the ansi argument 
