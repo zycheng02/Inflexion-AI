@@ -34,20 +34,45 @@ def move(board: dict[tuple, tuple], pos, direction) -> tuple:
 
     return (new_r, new_q)
 
-def update(board: dict[tuple, tuple], pos, move_direction = None) -> dict[tuple, tuple]:
+def update(board: dict[tuple, tuple], pos, move_direction = None, spread=False) -> dict[tuple, tuple]:
     """
     Update the game board after token movement.
     """
-    token = board[pos]
+    new_board = board.copy()
+    token = new_board[pos]
     colour, power = token
-    d_pos = move(board, pos, move_direction)
-    if d_pos in board:
-        d_token = board[d_pos]
+    if spread:
+        power = 1
+    d_pos = move(new_board, pos, move_direction)
+    if d_pos in new_board:
+        d_token = new_board[d_pos]
         d_power = d_token[1]
         power += d_power
-    board.pop(pos)
-    board[d_pos] = (colour, power)
+    if not spread:
+        new_board.pop(pos)
+    new_board[d_pos] = (colour, power)
+    return new_board
 
+def spread(board: dict[tuple, tuple], pos, move_direction):
+    new_board = board.copy()
+    token = new_board[pos]
+    power = token[1]
+    curr_pos = pos
+    for i in range(power):
+        new_pos = move(new_board, curr_pos, move_direction)
+        new_board = update(new_board, curr_pos, move_direction, True)
+        curr_pos = new_pos
+    new_board.pop(pos)
+    return new_board
+
+def check_fin(board: dict[tuple, tuple]):
+    if board != None:
+        tokens = list(board.values())
+        win_colour = tokens[0][0]
+        for i in tokens:
+            if i[0] != win_colour:
+                return False
+    return win_colour
 
 def search(input: dict[tuple, tuple]) -> list[tuple]:
     """

@@ -6,6 +6,8 @@ from .program import search
 from .program import move
 from .program import update
 from .program import Direction
+from .program import spread
+from .program import check_fin
 from .utils import render_board
 
 # WARNING: Do *not* modify any of the code in this file, and submit it as is!
@@ -48,8 +50,18 @@ def main():
     sequence: list[tuple] = search(input)
     print_sequence(sequence)
     # test move and update:
-    # update(input, (5, 6), Direction.UP)
-    # print(render_board(input, ansi=False))
+    n_input = update(input, (5, 6), Direction.UP)
+    print(render_board(input, ansi=False))
+    n_input = update(n_input, (6, 5), Direction.UP_RIGHT)
+    n_input = update(n_input, (0, 5), Direction.UP)
+    print(render_board(n_input, ansi=False))
+    print(render_board(input, ansi=False))
+    print(check_fin(n_input))
+
+    # test spread:
+    n_input = spread(n_input, (1,3), Direction.DOWN_RIGHT)
+    print(render_board(n_input, ansi=False))
+    print(check_fin(n_input))
 
 if __name__ == "__main__":
     main()
