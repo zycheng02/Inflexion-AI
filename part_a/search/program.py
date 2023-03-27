@@ -12,6 +12,18 @@ class Direction(Enum):
     DOWN_LEFT = (-1, 0)
     UP_LEFT = (0, -1)
 
+class Node():
+    """A node class for A* Pathfinding"""
+    def __init__(self, parent=None, position=None):
+        self.parent = parent
+        self.position = position
+        self.g = 0
+        self.h = 0
+        self.f = 0
+    def __eq__(self, other):
+        return self.position == other.position
+
+
 def move(board: dict[tuple, tuple], pos, direction) -> tuple:
     """
     Compute the end coordinates of the token movement towards given direction.
@@ -99,7 +111,7 @@ def calc_heuristics(board: dict[tuple, tuple], list_actions):
         heuristics[action] = h
     return heuristics
 
-def search(input: dict[tuple, tuple]) -> list[tuple]:
+def search(board: dict[tuple, tuple]) -> list[tuple]:
     """
     This is the entry point for your submission. The input is a dictionary
     of board cell states, where the keys are tuples of (r, q) coordinates, and
@@ -108,6 +120,24 @@ def search(input: dict[tuple, tuple]) -> list[tuple]:
 
     See the specification document for more details.
     """
+    # Create start node list
+    start_node_list = []
+    tokens = list(board.values())
+        win_colour = tokens[0][0]
+        for i in tokens:
+            if i[0] == win_colour:
+                node = Node(self,Null,i[0])
+                start_node_list.append()
+    # Initialize both open and closed list
+    open_list=[]
+    closed_list=[]
+    # Add the start node
+    for node in start_node_list:
+        open_list.append(node)
+    # Loop until you find the end
+
+        # get the current node
+
 
     # The render_board function is useful for debugging -- it will print out a 
     # board state in a human-readable format. Try changing the ansi argument 
