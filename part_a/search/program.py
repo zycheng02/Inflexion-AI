@@ -1,6 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
+
 from .utils import render_board
 from enum import Enum
 
@@ -14,9 +15,10 @@ class Direction(Enum):
 
 class Node():
     """A node class for A* Pathfinding"""
-    def __init__(self, parent=None, position=None):
+    def __init__(self, parent=None, position=None, action=None):
         self.parent = parent
         self.position = position
+        self.action = action
         self.g = 0
         self.h = 0
         self.f = 0
@@ -29,7 +31,7 @@ def move(board: dict[tuple, tuple], pos, direction) -> tuple:
     Compute the end coordinates of the token movement towards given direction.
     """
     r, q = pos
-    r_change, q_change = direction.value
+    r_change, q_change = direction
     #calculate the new position of the token
     new_r = r + r_change
     new_q = q + q_change
@@ -84,7 +86,7 @@ def check_fin(board: dict[tuple, tuple]):
         for i in tokens:
             if i[0] != win_colour:
                 return False
-    return win_colour
+    return True
 
 def possible_actions(board: dict[tuple, tuple], colour):
     list_actions = []
@@ -122,22 +124,80 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
     """
     # Create start node list
     start_node_list = []
+    action_list = []
     tokens = list(board.values())
-        win_colour = tokens[0][0]
-        for i in tokens:
-            if i[0] == win_colour:
-                node = Node(self,Null,i[0])
-                start_node_list.append()
+    win_colour = 'r'
+    #initialize start node list and action list
+    for i in tokens:
+        if i[0] == win_colour:
+            node = Node(None,i[0])
+            start_node_list.append(node)
+    action_list = possible_actions(board, 'r')
+
     # Initialize both open and closed list
     open_list=[]
     closed_list=[]
     # Add the start node
     for node in start_node_list:
         open_list.append(node)
+
     # Loop until you find the end
-
+    while (open_list !=[]):
         # get the current node
+        current_node = open_list[0]
+        current_index = 0
 
+        for index, item in enumerate(open_list):
+            if item.f < current_node.f:
+                current_node = item
+                current_index = index
+        
+
+        # Pop current off open list, add to closed list
+        open_list.pop(current_index)
+        closed_list.append(current_node)
+
+        # Found the goal (if one color left on board)
+        if check_fin == True:
+            path = []
+            current = current_node
+            while current is not None:
+                path.append(current.position)
+                current = current.parent
+            return path[::-1] # Return reversed path
+
+        # Generate children
+        children = []
+        # Create children node
+        for action in action_list:
+            new_node = Node(current_node, action[0], action[1])
+            children.append(new_node)
+        
+        #loop through children
+        for child in children:
+            # action_list_child = []
+            # for direction in Direction:
+            #     action_list_child.append((child.position, direction))
+
+            # Child is on the closed list
+            for closed_child in closed_list:
+                if child == closed_child:
+                    continue    
+
+            # Create the f, g, and h values
+            heuristics = calc_heuristics(board, [(child.position, (0,0))])
+
+            child.g = current_node.g + 1
+            child.h = heuristics[(child.position,(0,0))]
+            child.f = child.g + child.h
+
+            # Child is already in the open list
+            for open_node in open_list:
+                if child == open_node and child.g > open_node.g:
+                    continue
+                    
+            # Add the child to the open list
+            open_list.append(child)
 
     # The render_board function is useful for debugging -- it will print out a 
     # board state in a human-readable format. Try changing the ansi argument 
@@ -146,10 +206,10 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
 
     # Here we're returning "hardcoded" actions for the given test.csv file.
     # Of course, you'll need to replace this with an actual solution...
-    return [
-        (5, 6, -1, 1),
-        (3, 1, 0, 1),
-        (3, 2, -1, 1),
-        (1, 4, 0, -1),
-        (1, 3, 0, -1)
-    ]
+    # return [
+    #     (5, 6, -1, 1),
+    #     (3, 1, 0, 1),
+    #     (3, 2, -1, 1),
+    #     (1, 4, 0, -1),
+    #     (1, 3, 0, -1)
+    # ]
