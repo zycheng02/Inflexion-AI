@@ -14,14 +14,15 @@ class Direction(Enum):
 
 class Node():
     """A node class for A* Pathfinding"""
-    def __init__(self, parent=None, position=None):
+    def __init__(self, parent=None, action=None, board=None):
         self.parent = parent
-        self.position = position
+        self.action = action
+        self.board = board
         self.g = 0
         self.h = 0
         self.f = 0
     def __eq__(self, other):
-        return self.position == other.position
+        return self.action == other.action
 
 
 def move(board: dict[tuple, tuple], pos, direction) -> tuple:
@@ -102,14 +103,82 @@ def num_of_opponents(board: dict[tuple, tuple], colour = 'b'):
             count += 1
     return count
 
-def calc_heuristics(board: dict[tuple, tuple], list_actions):
-    heuristics = {}
-    for action in list_actions:
-        pos, direction = action
-        new_board = spread(board, pos, direction)
-        h = num_of_opponents(new_board)
-        heuristics[action] = h
-    return heuristics
+def calc_heuristics(board: dict[tuple, tuple], action):
+    pos, direction = action
+    new_board = spread(board, pos, direction)
+    h = num_of_opponents(new_board)
+    return h
+
+def coloured_token_pos(board: dict[tuple, tuple], colour = 'r'):
+    pos = []
+    for token in board:
+        if board[token][0] == colour:
+            pos.append(token)
+    return pos
+
+def a_star(board: dict[tuple, tuple], list_red_pos):
+    open_list = []
+    for pos in list_red_pos:
+        new_node = Node(None, None, board)
+        new_node.g = new_node.h = new_node.f = 0
+        open_list.append(new_node)
+
+    closed_list = []
+
+    while len(open_list) > 0:
+        # print('-----------')
+        curr_node = open_list[0]
+        curr_index = 0
+        for i in range(len(open_list)):
+            if open_list[i].f < curr_node.f:
+                curr_node = open_list[i]
+                curr_index = i
+        open_list.pop(curr_index)
+        closed_list.append(curr_node)
+
+        if (check_fin(curr_node.board) == 'r'):
+            # print('fffffffffffff')
+            path = []
+            curr = curr_node
+            # print(render_board(curr.board))
+            while curr is not None and curr.action is not None:
+                # print(render_board(curr.board))
+                # print(curr.action)
+                direction_coord = curr.action[1].value
+                action_tup = (curr.action[0][0], curr.action[0][1], direction_coord[0], direction_coord[1])
+                path.append(action_tup)
+                curr = curr.parent
+            return path[::-1]
+        
+        children = []
+        # print(curr_node.board)
+        list_actions = possible_actions(curr_node.board, 'r')
+        # print(list_actions)
+        for new_action in list_actions:
+            # print(new_action)
+            new_position = move(curr_node.board, new_action[0], new_action[1])
+            new_board = spread(curr_node.board, new_action[0], new_action[1])
+            new_child_node = Node(curr_node, new_action, new_board)
+            new_child_node.h = calc_heuristics(curr_node.board, new_action)
+            children.append(new_child_node)
+        
+        # print(children)
+
+        for child in children:
+            # print('ccccccccc')
+            # print(child.board)
+            for closed_child in closed_list:
+                if child == closed_child:
+                    continue
+            child.g = curr_node.g + 1
+            child.f = child.g + child.h
+
+            for open_node in open_list:
+                if child == open_node and child.g > open_node.g:
+                    continue
+
+            open_list.append(child)
+
 
 def search(board: dict[tuple, tuple]) -> list[tuple]:
     """
@@ -120,20 +189,22 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
 
     See the specification document for more details.
     """
+    red_token_pos = coloured_token_pos(board)
+    steps = a_star(board, red_token_pos)
     # Create start node list
-    start_node_list = []
-    tokens = list(board.values())
-        win_colour = tokens[0][0]
-        for i in tokens:
-            if i[0] == win_colour:
-                node = Node(self,Null,i[0])
-                start_node_list.append()
+    # start_node_list = []
+    # tokens = list(board.values())
+    # win_colour = tokens[0][0]
+    # for i in tokens:
+    #         if i[0] == win_colour:
+    #             node = Node(self,Null,i[0])
+    #             start_node_list.append()
     # Initialize both open and closed list
-    open_list=[]
-    closed_list=[]
+    # open_list=[]
+    # closed_list=[]
     # Add the start node
-    for node in start_node_list:
-        open_list.append(node)
+    # for node in start_node_list:
+    #     open_list.append(node)
     # Loop until you find the end
 
         # get the current node
@@ -142,14 +213,8 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
     # The render_board function is useful for debugging -- it will print out a 
     # board state in a human-readable format. Try changing the ansi argument 
     # to True to see a colour-coded version (if your terminal supports it).
-    print(render_board(input, ansi=False))
+    print(render_board(board, ansi=False))
 
     # Here we're returning "hardcoded" actions for the given test.csv file.
     # Of course, you'll need to replace this with an actual solution...
-    return [
-        (5, 6, -1, 1),
-        (3, 1, 0, 1),
-        (3, 2, -1, 1),
-        (1, 4, 0, -1),
-        (1, 3, 0, -1)
-    ]
+    return steps

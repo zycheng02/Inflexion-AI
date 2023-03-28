@@ -52,22 +52,22 @@ def main():
     sequence: list[tuple] = search(input)
     print_sequence(sequence)
     # test move and update:
-    print(possible_actions(input, "r"))
-    n_input = update(input, (5, 6), Direction.UP)
-    print(render_board(input, ansi=False))
-    n_input = update(n_input, (6, 5), Direction.UP_RIGHT)
-    n_input = update(n_input, (0, 5), Direction.UP)
-    print(render_board(n_input, ansi=False))
-    print(render_board(input, ansi=False))
-    print(check_fin(n_input))
+    # print(possible_actions(input, "r"))
+    # n_input = update(input, (5, 6), Direction.UP)
+    # print(render_board(input, ansi=False))
+    # n_input = update(n_input, (6, 5), Direction.UP_RIGHT)
+    # n_input = update(n_input, (0, 5), Direction.UP)
+    # print(render_board(n_input, ansi=False))
+    # print(render_board(input, ansi=False))
+    # print(check_fin(n_input))
 
     # test spread:
-    n_input = spread(n_input, (1,3), Direction.DOWN_RIGHT)
-    print(render_board(n_input, ansi=False))
-    print(check_fin(n_input))
+    # n_input = spread(n_input, (1,3), Direction.DOWN_RIGHT)
+    # print(render_board(n_input, ansi=False))
+    # print(check_fin(n_input))
 
     # test heuristics:
-    print(calc_heuristics(input, possible_actions(input, "r")))
+    # print(calc_heuristics(input, possible_actions(input, "r")))
 
 if __name__ == "__main__":
     main()
