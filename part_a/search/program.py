@@ -2,6 +2,7 @@
 # Project Part A: Single Player Infexion
 
 
+from time import sleep
 from .utils import render_board
 from enum import Enum
 
@@ -22,8 +23,7 @@ class Node():
         self.g = 0
         self.h = 0
         self.f = 0
-    def __eq__(self, other):
-        return self.position == other.position
+
 
 
 def move(board: dict[tuple, tuple], pos, direction) -> tuple:
@@ -122,17 +122,18 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
 
     See the specification document for more details.
     """
+    cur_board = board
     # Create start node list
     start_node_list = []
     action_list = []
-    tokens = list(board.values())
+    tokens = list(board.keys())
     win_colour = 'r'
-    #initialize start node list and action list
+    #initialize start node list
     for i in tokens:
-        if i[0] == win_colour:
-            node = Node(None,i[0])
+        if board[i][0] == win_colour:
+            node = Node(None,i,(0,0))
             start_node_list.append(node)
-    action_list = possible_actions(board, 'r')
+    
 
     # Initialize both open and closed list
     open_list=[]
@@ -140,7 +141,7 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
     # Add the start node
     for node in start_node_list:
         open_list.append(node)
-
+    print("run")
     # Loop until you find the end
     while (open_list !=[]):
         # get the current node
@@ -151,14 +152,20 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
             if item.f < current_node.f:
                 current_node = item
                 current_index = index
+                cur_board = spread(cur_board, current_node.position, current_node.action)
         
 
         # Pop current off open list, add to closed list
         open_list.pop(current_index)
         closed_list.append(current_node)
 
+        cur_board = spread(cur_board, current_node.position, current_node.action)
+        render_board(cur_board)
+        sleep(2)
+        action_list = possible_actions(cur_board, 'r')
         # Found the goal (if one color left on board)
         if check_fin == True:
+            print(1)
             path = []
             current = current_node
             while current is not None:
@@ -172,12 +179,13 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
         for action in action_list:
             new_node = Node(current_node, action[0], action[1])
             children.append(new_node)
-        
+
+        # heuristics = calc_heuristics(board, action_list)
+
+
         #loop through children
         for child in children:
-            # action_list_child = []
-            # for direction in Direction:
-            #     action_list_child.append((child.position, direction))
+            print('c')
 
             # Child is on the closed list
             for closed_child in closed_list:
@@ -185,17 +193,19 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
                     continue    
 
             # Create the f, g, and h values
-            heuristics = calc_heuristics(board, [(child.position, (0,0))])
+            hypo_board = spread(cur_board, child.position, child.action)
+
+            # might need to keep board in node? how else to keep track of board change
 
             child.g = current_node.g + 1
-            child.h = heuristics[(child.position,(0,0))]
+            child.h = num_of_opponents(hypo_board)
             child.f = child.g + child.h
 
             # Child is already in the open list
             for open_node in open_list:
                 if child == open_node and child.g > open_node.g:
+                    print("g")
                     continue
-                    
             # Add the child to the open list
             open_list.append(child)
 
