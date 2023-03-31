@@ -49,18 +49,21 @@ def move(board: dict[tuple, tuple], pos, direction) -> tuple:
 
 def update(board: dict[tuple, tuple], pos, move_direction = None, spread=False) -> dict[tuple, tuple]:
     """
-    Update the game board after token movement.
+    Update the game board for a single token movement.
     """
     new_board = board.copy()
     token = new_board[pos]
     colour, power = token
     if spread:
         power = 1
+    # updated position
     d_pos = move(new_board, pos, move_direction)
+    # updated board
     if d_pos in new_board:
         d_token = new_board[d_pos]
         d_power = d_token[1]
         power += d_power
+
     if not spread:
         new_board.pop(pos)
     new_board[d_pos] = (colour, power)
@@ -71,20 +74,36 @@ def spread(board: dict[tuple, tuple], pos, move_direction):
     token = new_board[pos]
     power = token[1]
     curr_pos = pos
+    powerOverflow=[]
+    # iterate movement for all positions, creating n tokens for power level n of token being spread in given direction
     for i in range(power):
-        new_pos = move(new_board, curr_pos, move_direction)
-        new_board = update(new_board, curr_pos, move_direction, True)
-        curr_pos = new_pos
+        if curr_pos in new_board:
+            new_pos = move(new_board, curr_pos, move_direction)
+            new_board = update(new_board, curr_pos, move_direction, True)
+
+            # power bigger than 6, add token to removal list to be removed after spread completion
+            if (new_board[new_pos][1] >6):
+                powerOverflow.append(new_pos)
+            
+            curr_pos = new_pos
+
+    for i in powerOverflow: 
+        new_board.pop(i)
+
     new_board.pop(pos)
     return new_board
 
 def check_fin(board: dict[tuple, tuple]):
     if board != None:
         tokens = list(board.values())
-        win_colour = tokens[0][0]
-        for i in tokens:
-            if i[0] != win_colour:
-                return False
+        # print(tokens)
+        if len(tokens) != 0:
+            win_colour = tokens[0][0]
+            # if all tokens left on board are same colour - win condition
+            for i in tokens:
+                if i[0] != win_colour:
+                    return False
+        else: return 'r'
     return win_colour
 
 def possible_actions(board: dict[tuple, tuple], colour):
@@ -93,6 +112,7 @@ def possible_actions(board: dict[tuple, tuple], colour):
         curr_colour = board[token][0]
         if curr_colour == colour:
             for direction in Direction:
+                # action is (token, direction) tuple
                 list_actions.append((token, direction))
     return list_actions
 
@@ -142,7 +162,7 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
             curr = curr_node
             # print(render_board(curr.board))
             while curr is not None and curr.action is not None:
-                # print(render_board(curr.board))
+                print(render_board(curr.board))
                 # print(curr.action)
                 direction_coord = curr.action[1].value
                 action_tup = (curr.action[0][0], curr.action[0][1], direction_coord[0], direction_coord[1])
@@ -191,23 +211,6 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
     """
     red_token_pos = coloured_token_pos(board)
     steps = a_star(board, red_token_pos)
-    # Create start node list
-    # start_node_list = []
-    # tokens = list(board.values())
-    # win_colour = tokens[0][0]
-    # for i in tokens:
-    #         if i[0] == win_colour:
-    #             node = Node(self,Null,i[0])
-    #             start_node_list.append()
-    # Initialize both open and closed list
-    # open_list=[]
-    # closed_list=[]
-    # Add the start node
-    # for node in start_node_list:
-    #     open_list.append(node)
-    # Loop until you find the end
-
-        # get the current node
 
 
     # The render_board function is useful for debugging -- it will print out a 
