@@ -14,15 +14,17 @@ class Direction(Enum):
 
 class Node():
     """A node class for A* Pathfinding"""
-    def __init__(self, parent=None, action=None, board=None):
+    def __init__(self, parent=None, action=None, board=None, nodeNo=None):
         self.parent = parent
         self.action = action
         self.board = board
+        self.nodeNo = nodeNo
         self.g = 0
         self.h = 0
         self.f = 0
     def __eq__(self, other):
-        return self.action == other.action
+        return (self.nodeNo == other.nodeNo)
+        # return self.action == other.action
 
 
 def move(board: dict[tuple, tuple], pos, direction) -> tuple:
@@ -138,21 +140,53 @@ def coloured_token_pos(board: dict[tuple, tuple], colour = 'r'):
 
 def a_star(board: dict[tuple, tuple], list_red_pos):
     open_list = []
-    for pos in list_red_pos:
-        new_node = Node(None, None, board)
-        new_node.g = new_node.h = new_node.f = 0
-        open_list.append(new_node)
-
+    nodecount = 0
+    # redundant same list of actions
+    
+    nodecount+=1
+    new_node = Node(None, None, board,nodecount)
+    new_node.g = new_node.h = new_node.f = 0
+    open_list.append(new_node)
+        
     closed_list = []
 
     while len(open_list) > 0:
         # print('-----------')
         curr_node = open_list[0]
         curr_index = 0
+        tiebreaker = True
+
         for i in range(len(open_list)):
+            # find next lowest cost move
             if open_list[i].f < curr_node.f:
                 curr_node = open_list[i]
                 curr_index = i
+                # if found no tiebreak needed
+                tiebreaker = False
+                # heuristics edit
+                # list_actions = possible_actions(curr_node.board, 'r')
+                # for new_action in list_actions:
+                #     # print(new_action)
+                #     new_position = move(curr_node.board, new_action[0], new_action[1])
+                #     new_board = spread(curr_node.board, new_action[0], new_action[1])
+                #     new_child_node = Node(curr_node, new_action, new_board)
+                #     new_child_node.h = calc_heuristics(curr_node.board, new_action)
+                #     if new_child_node.h
+            # if f value is same search using highest power r node
+        if tiebreaker == True:
+            red_token_list = coloured_token_pos(curr_node.board,'r')
+            curr_red =0
+            curr_red_index = 0
+            # for redtoken in red_token_list:
+            #     # if 
+            #     if curr_node.board[redtoken[0]][1] > curr_red[1][1]:
+                    
+        # for red_token in red_pos_list:
+        #     if 
+            
+
+        
+        # print(render_board(curr_node.board))
         open_list.pop(curr_index)
         closed_list.append(curr_node)
 
@@ -171,14 +205,15 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
             return path[::-1]
         
         children = []
-        # print(curr_node.board)
+        # print(render_board(curr_node.board))
         list_actions = possible_actions(curr_node.board, 'r')
         # print(list_actions)
         for new_action in list_actions:
             # print(new_action)
+            nodecount+=1
             new_position = move(curr_node.board, new_action[0], new_action[1])
             new_board = spread(curr_node.board, new_action[0], new_action[1])
-            new_child_node = Node(curr_node, new_action, new_board)
+            new_child_node = Node(curr_node, new_action, new_board, nodecount)
             new_child_node.h = calc_heuristics(curr_node.board, new_action)
             children.append(new_child_node)
         
@@ -191,6 +226,7 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
                 if child == closed_child:
                     continue
             child.g = curr_node.g + 1
+            print(child.g)
             child.f = child.g + child.h
 
             for open_node in open_list:
