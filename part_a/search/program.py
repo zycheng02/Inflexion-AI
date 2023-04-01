@@ -1,6 +1,7 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
+from time import sleep
 from .utils import render_board
 from enum import Enum
 
@@ -99,13 +100,12 @@ def check_fin(board: dict[tuple, tuple]):
     if board != None:
         tokens = list(board.values())
         # print(tokens)
-        if len(tokens) != 0:
-            win_colour = tokens[0][0]
-            # if all tokens left on board are same colour - win condition
-            for i in tokens:
-                if i[0] != win_colour:
-                    return False
-        else: return 'r'
+        win_colour = 'r'
+        # if all tokens left on board are same colour - win condition
+        for i in tokens:
+            if i[0] != win_colour:
+                return False
+
     return win_colour
 
 def possible_actions(board: dict[tuple, tuple], colour):
@@ -126,10 +126,22 @@ def num_of_opponents(board: dict[tuple, tuple], colour = 'b'):
     return count
 
 def calc_heuristics(board: dict[tuple, tuple], action):
+    """
+    calculates sum of blue power as int after action - (position, dir)-> spread
+    """
     pos, direction = action
     new_board = spread(board, pos, direction)
-    h = num_of_opponents(new_board)
-    return h
+    sum =0
+    for token in new_board.values():
+        if token[0] == 'b':
+            sum+= token[1]
+    for token in new_board.values():
+        if token[0] == 'r':
+            sum-= token[1]
+    print(sum)
+    # print(render_board(new_board))
+    # sleep(0.05)
+    return sum 
 
 def coloured_token_pos(board: dict[tuple, tuple], colour = 'r'):
     pos = []
@@ -225,8 +237,8 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
             for closed_child in closed_list:
                 if child == closed_child:
                     continue
-            child.g = curr_node.g + 1
-            print(child.g)
+            child.g = child.parent.g + 1
+
             child.f = child.g + child.h
 
             for open_node in open_list:
