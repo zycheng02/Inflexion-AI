@@ -2,6 +2,7 @@
 # Project Part A: Single Player Infexion
 
 from time import sleep
+import time
 from .utils import render_board
 from enum import Enum
 
@@ -138,7 +139,7 @@ def calc_heuristics(board: dict[tuple, tuple], action):
     for token in new_board.values():
         if token[0] == 'r':
             sum-= token[1]
-    print(sum)
+    # print(sum)
     # print(render_board(new_board))
     # sleep(0.05)
     return sum 
@@ -151,10 +152,9 @@ def coloured_token_pos(board: dict[tuple, tuple], colour = 'r'):
     return pos
 
 def a_star(board: dict[tuple, tuple], list_red_pos):
+    start = time.time()
     open_list = []
     nodecount = 0
-    # redundant same list of actions
-    
     nodecount+=1
     new_node = Node(None, None, board,nodecount)
     new_node.g = new_node.h = new_node.f = 0
@@ -214,6 +214,9 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
                 action_tup = (curr.action[0][0], curr.action[0][1], direction_coord[0], direction_coord[1])
                 path.append(action_tup)
                 curr = curr.parent
+            end = time.time()
+            print("nodes created: ", nodecount)
+            print("time taken: ", end-start, "\n")
             return path[::-1]
         
         children = []
@@ -264,7 +267,7 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
     # The render_board function is useful for debugging -- it will print out a 
     # board state in a human-readable format. Try changing the ansi argument 
     # to True to see a colour-coded version (if your terminal supports it).
-    print(render_board(board, ansi=False))
+    # print(render_board(board, ansi=False))
 
     # Here we're returning "hardcoded" actions for the given test.csv file.
     # Of course, you'll need to replace this with an actual solution...
