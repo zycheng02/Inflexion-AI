@@ -126,6 +126,22 @@ def num_of_opponents(board: dict[tuple, tuple], colour = 'b'):
             count += 1
     return count
 
+def find_distance(board: dict[tuple, tuple]):
+    distance = []
+    red_tokens = {k: v for k, v in board.items() if v[0] == 'r'}
+    max_power_red = max(red_tokens, key=lambda k: red_tokens[k][1])
+
+    for token in board:
+        if board[token][0] == 'b':
+            dis = abs(token[0] - max_power_red[0]) + abs(token[1] - max_power_red[1])
+            distance.append(dis)
+    
+    if len(distance) == 0:
+        return 0
+
+    min_distance = min(distance)
+    return min_distance
+
 def calc_heuristics(board: dict[tuple, tuple], action):
     """
     calculates sum of blue power as int after action - (position, dir)-> spread
@@ -133,15 +149,12 @@ def calc_heuristics(board: dict[tuple, tuple], action):
     pos, direction = action
     new_board = spread(board, pos, direction)
     sum =0
-    for token in new_board.values():
-        if token[0] == 'b':
-            sum+= token[1]
-    for token in new_board.values():
-        if token[0] == 'r':
-            sum-= token[1]
-    # print(sum)
-    # print(render_board(new_board))
-    # sleep(0.05)
+    sum = num_of_opponents(new_board)
+    red_tokens = {k: v for k, v in board.items() if v[0] == 'r'}
+    max_power_red = max(red_tokens, key=lambda k: red_tokens[k][1])
+    sum -= board[max_power_red][1]
+    min_distance = find_distance(new_board)*0.6
+    sum += min_distance
     return sum 
 
 def coloured_token_pos(board: dict[tuple, tuple], colour = 'r'):
