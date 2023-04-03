@@ -133,16 +133,23 @@ def calc_heuristics(board: dict[tuple, tuple], action):
     pos, direction = action
     new_board = spread(board, pos, direction)
     sum =0
+    sum1 =0
     for token in new_board.values():
         if token[0] == 'b':
             sum+= token[1]
     for token in new_board.values():
+
         if token[0] == 'r':
-            sum-= token[1]
-    # print(sum)
+            # if token[1] > sum1:
+            #     sum1 = token[1]
+            sum -= token[1]
+
+    # print(sum/ sum1 )
     # print(render_board(new_board))
     # sleep(0.05)
-    return sum 
+    return sum *0.50
+    return 0
+# def calc_distance(a, b):
 
 def coloured_token_pos(board: dict[tuple, tuple], colour = 'r'):
     pos = []
@@ -154,61 +161,54 @@ def coloured_token_pos(board: dict[tuple, tuple], colour = 'r'):
 def a_star(board: dict[tuple, tuple], list_red_pos):
     start = time.time()
     open_list = []
+    
     nodecount = 0
     nodecount+=1
+    # create initial node to add to search list
     new_node = Node(None, None, board,nodecount)
     new_node.g = new_node.h = new_node.f = 0
     open_list.append(new_node)
         
     closed_list = []
-
+    lastNode = new_node
+    lastParent = -1
+    # begin search
     while len(open_list) > 0:
-        # print('-----------')
         curr_node = open_list[0]
         curr_index = 0
         tiebreaker = True
 
         for i in range(len(open_list)):
-            # find next lowest cost move
+            # find next lowest cost (f) move - acts like pq
             if open_list[i].f < curr_node.f:
                 curr_node = open_list[i]
                 curr_index = i
+
                 # if found no tiebreak needed
                 tiebreaker = False
-                # heuristics edit
-                # list_actions = possible_actions(curr_node.board, 'r')
-                # for new_action in list_actions:
-                #     # print(new_action)
-                #     new_position = move(curr_node.board, new_action[0], new_action[1])
-                #     new_board = spread(curr_node.board, new_action[0], new_action[1])
-                #     new_child_node = Node(curr_node, new_action, new_board)
-                #     new_child_node.h = calc_heuristics(curr_node.board, new_action)
-                #     if new_child_node.h
-            # if f value is same search using highest power r node
-        if tiebreaker == True:
-            red_token_list = coloured_token_pos(curr_node.board,'r')
-            curr_red =0
-            curr_red_index = 0
-            # for redtoken in red_token_list:
-            #     # if 
-            #     if curr_node.board[redtoken[0]][1] > curr_red[1][1]:
-                    
-        # for red_token in red_pos_list:
-        #     if 
-            
 
-        
-        # print(render_board(curr_node.board))
+        # if tiebreaker == True:
+        #     curr_node = open_list[-1]
+        #     curr_index = -1
+
+                
+
+
+                
+        # choose node with smallest f value to explore, add to visited list (closed)
         open_list.pop(curr_index)
         closed_list.append(curr_node)
 
+        # check if won state - only red tokens left on board 
         if (check_fin(curr_node.board) == 'r'):
-            # print('fffffffffffff')
             path = []
             curr = curr_node
+            spreadcount = 0
             # print(render_board(curr.board))
+            # back track to get path
             while curr is not None and curr.action is not None:
                 print(render_board(curr.board))
+                spreadcount +=1
                 # print(curr.action)
                 direction_coord = curr.action[1].value
                 action_tup = (curr.action[0][0], curr.action[0][1], direction_coord[0], direction_coord[1])
@@ -216,15 +216,16 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
                 curr = curr.parent
             end = time.time()
             print("nodes created: ", nodecount)
-            print("time taken: ", end-start, "\n")
+            print("time taken: ", end-start)
+            print("number of spreads: ", spreadcount, "\n")
             return path[::-1]
         
+        # not won - explore 1 layer deeper generating child nodes
         children = []
-        # print(render_board(curr_node.board))
         list_actions = possible_actions(curr_node.board, 'r')
-        # print(list_actions)
+
+        # generates 6n child nodes where n is number of red tokens
         for new_action in list_actions:
-            # print(new_action)
             nodecount+=1
             new_position = move(curr_node.board, new_action[0], new_action[1])
             new_board = spread(curr_node.board, new_action[0], new_action[1])
@@ -232,18 +233,16 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
             new_child_node.h = calc_heuristics(curr_node.board, new_action)
             children.append(new_child_node)
         
-        # print(children)
 
         for child in children:
-            # print('ccccccccc')
-            # print(child.board)
+            # if visited, go to next iteration of search loop 
             for closed_child in closed_list:
                 if child == closed_child:
                     continue
+
             child.g = child.parent.g + 1
-
             child.f = child.g + child.h
-
+            # if any nodes in open list that is one layer above child, go to next iteration of search loop
             for open_node in open_list:
                 if child == open_node and child.g > open_node.g:
                     continue
