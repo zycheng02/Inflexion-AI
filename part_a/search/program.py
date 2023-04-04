@@ -5,6 +5,7 @@ from time import sleep
 import time
 from .utils import render_board
 from enum import Enum
+from collections import Counter
 
 class Direction(Enum):
     UP = (1, -1)
@@ -160,38 +161,24 @@ def calc_heuristics(board: dict[tuple, tuple], action):
 def calc_heuristics1(board: dict[tuple, tuple], action):
     pos, direction = action
     new_board = spread(board, pos, direction)
-    unique = [(r, q) for r, q in new_board.keys() if new_board[(r,q)][0] == 'b']
     tokens = [(r, q) for r, q in new_board.keys() if new_board[(r,q)][0] == 'b']
+    repeat = []
 
-    for blue in tokens[:]:
-        r, q = blue
-        broke = False
-        for rqline in unique:
-            r1, q1 = rqline
-            # if blue token on same r or q line as another token, remove token from tokens
-            if (r == r1 or q == q1) and (blue !=rqline):
-                # sameline
-                tokens.remove(blue)
-                broke = True
-                break
-        if (broke):
-                break 
-        for updownline in unique:
-             # if blue token on same updown line as another token, remove token from tokens
-            r1, q1 = updownline
-            
-            # add up 1-6 times, if equals another token, remove blue
-            for i in range(1,7):
-                if (r + i*1 ==r1) and (q +i*-1 ==q1) and (blue !=updownline):
-                    tokens.remove(blue)
-                    broke = True
-                    break
-            if (broke):
-                break
+    if len(tokens) == 1:
+        return 1
+    
+    for blue in tokens:
+        for dir in Direction:
+            curr_coord = blue
+            for i in range(6):
+                new_coord = move(new_board, curr_coord, dir)
+                if new_coord in tokens:
+                    tokens.remove(new_coord)
+                curr_coord = new_coord
         
     # end up with token amount = amount of distinct lines
     num_lines = len(tokens)
-    return 1.5*num_lines 
+    return 2*num_lines
     print(num_lines)
 
 
@@ -214,13 +201,10 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
     open_list.append(new_node)
         
     closed_list = []
-    lastNode = new_node
-    lastParent = -1
     # begin search
     while len(open_list) > 0:
         curr_node = open_list[0]
         curr_index = 0
-        tiebreaker = True
 
         for i in range(len(open_list)):
             # find next lowest cost (f) move - acts like pq
@@ -228,17 +212,6 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
                 curr_node = open_list[i]
                 curr_index = i
 
-                # if found no tiebreak needed
-                tiebreaker = False
-
-        # if tiebreaker == True:
-        #     curr_node = open_list[-1]
-        #     curr_index = -1
-
-                
-
-
-                
         # choose node with smallest f value to explore, add to visited list (closed)
         open_list.pop(curr_index)
         closed_list.append(curr_node)
@@ -251,7 +224,7 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
             # print(render_board(curr.board))
             # back track to get path
             while curr is not None and curr.action is not None:
-                print(render_board(curr.board))
+                # print(render_board(curr.board))
                 spreadcount +=1
                 # print(curr.action)
                 direction_coord = curr.action[1].value
@@ -259,9 +232,9 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
                 path.append(action_tup)
                 curr = curr.parent
             end = time.time()
-            print("nodes created: ", nodecount)
-            print("time taken: ", end-start)
-            print("number of spreads: ", spreadcount, "\n")
+            # print("nodes created: ", nodecount)
+            # print("time taken: ", end-start)
+            # print("number of spreads: ", spreadcount, "\n")
             return path[::-1]
         
         # not won - explore 1 layer deeper generating child nodes
