@@ -1,11 +1,8 @@
 # COMP30024 Artificial Intelligence, Semester 1 2023
 # Project Part A: Single Player Infexion
 
-from time import sleep
 import time
-from .utils import render_board
 from enum import Enum
-from collections import Counter
 
 class Direction(Enum):
     UP = (1, -1)
@@ -27,7 +24,6 @@ class Node():
         self.f = 0
     def __eq__(self, other):
         return (self.nodeNo == other.nodeNo)
-        # return self.action == other.action
 
 
 def move(board: dict[tuple, tuple], pos, direction) -> tuple:
@@ -101,7 +97,6 @@ def spread(board: dict[tuple, tuple], pos, move_direction):
 def check_fin(board: dict[tuple, tuple]):
     if board != None:
         tokens = list(board.values())
-        # print(tokens)
         win_colour = 'r'
         # if all tokens left on board are same colour - win condition
         for i in tokens:
@@ -120,45 +115,7 @@ def possible_actions(board: dict[tuple, tuple], colour):
                 list_actions.append((token, direction))
     return list_actions
 
-def num_of_opponents(board: dict[tuple, tuple], colour = 'b'):
-    count = 0
-    for token in board.values():
-        if token[0] == colour:
-            count += 1
-    return count
-
-def find_distance(board: dict[tuple, tuple]):
-    distance = []
-    red_tokens = {k: v for k, v in board.items() if v[0] == 'r'}
-    max_power_red = max(red_tokens, key=lambda k: red_tokens[k][1])
-
-    for token in board:
-        if board[token][0] == 'b':
-            dis = abs(token[0] - max_power_red[0]) + abs(token[1] - max_power_red[1])
-            distance.append(dis)
-    
-    if len(distance) == 0:
-        return 0
-
-    min_distance = min(distance)
-    return min_distance
-
 def calc_heuristics(board: dict[tuple, tuple], action):
-    """
-    calculates sum of blue power as int after action - (position, dir)-> spread
-    """
-    pos, direction = action
-    new_board = spread(board, pos, direction)
-    sum =0
-    sum = num_of_opponents(new_board)
-    red_tokens = {k: v for k, v in board.items() if v[0] == 'r'}
-    max_power_red = max(red_tokens, key=lambda k: red_tokens[k][1])
-    sum -= board[max_power_red][1]
-    min_distance = find_distance(new_board)*0.6
-    sum += min_distance
-    return sum 
-
-def calc_heuristics1(board: dict[tuple, tuple], action):
     pos, direction = action
     new_board = spread(board, pos, direction)
     tokens = [(r, q) for r, q in new_board.keys() if new_board[(r,q)][0] == 'b']
@@ -179,17 +136,13 @@ def calc_heuristics1(board: dict[tuple, tuple], action):
     # end up with token amount = amount of distinct lines
     num_lines = len(tokens)
     return 2*num_lines
-    print(num_lines)
 
-
-def coloured_token_pos(board: dict[tuple, tuple], colour = 'r'):
-    pos = []
-    for token in board:
-        if board[token][0] == colour:
-            pos.append(token)
-    return pos
-
-def a_star(board: dict[tuple, tuple], list_red_pos):
+"""
+The following code was implemented based on the A* pathfinding pseudocode
+by Nicholas Swift
+https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
+"""
+def a_star(board: dict[tuple, tuple]):
     start = time.time()
     open_list = []
     
@@ -221,20 +174,14 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
             path = []
             curr = curr_node
             spreadcount = 0
-            # print(render_board(curr.board))
             # back track to get path
             while curr is not None and curr.action is not None:
-                # print(render_board(curr.board))
                 spreadcount +=1
-                # print(curr.action)
                 direction_coord = curr.action[1].value
                 action_tup = (curr.action[0][0], curr.action[0][1], direction_coord[0], direction_coord[1])
                 path.append(action_tup)
                 curr = curr.parent
             end = time.time()
-            # print("nodes created: ", nodecount)
-            # print("time taken: ", end-start)
-            # print("number of spreads: ", spreadcount, "\n")
             return path[::-1]
         
         # not won - explore 1 layer deeper generating child nodes
@@ -244,10 +191,9 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
         # generates 6n child nodes where n is number of red tokens
         for new_action in list_actions:
             nodecount+=1
-            new_position = move(curr_node.board, new_action[0], new_action[1])
             new_board = spread(curr_node.board, new_action[0], new_action[1])
             new_child_node = Node(curr_node, new_action, new_board, nodecount)
-            new_child_node.h = calc_heuristics1(curr_node.board, new_action)
+            new_child_node.h = calc_heuristics(curr_node.board, new_action)
             children.append(new_child_node)
         
 
@@ -276,8 +222,7 @@ def search(board: dict[tuple, tuple]) -> list[tuple]:
 
     See the specification document for more details.
     """
-    red_token_pos = coloured_token_pos(board)
-    steps = a_star(board, red_token_pos)
+    steps = a_star(board)
 
 
     # The render_board function is useful for debugging -- it will print out a 
