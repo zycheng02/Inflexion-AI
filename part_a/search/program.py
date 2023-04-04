@@ -157,6 +157,44 @@ def calc_heuristics(board: dict[tuple, tuple], action):
     sum += min_distance
     return sum 
 
+def calc_heuristics1(board: dict[tuple, tuple], action):
+    pos, direction = action
+    new_board = spread(board, pos, direction)
+    unique = [(r, q) for r, q in new_board.keys() if new_board[(r,q)][0] == 'b']
+    tokens = [(r, q) for r, q in new_board.keys() if new_board[(r,q)][0] == 'b']
+
+    for blue in tokens[:]:
+        r, q = blue
+        broke = False
+        for rqline in unique:
+            r1, q1 = rqline
+            # if blue token on same r or q line as another token, remove token from tokens
+            if (r == r1 or q == q1) and (blue !=rqline):
+                # sameline
+                tokens.remove(blue)
+                broke = True
+                break
+        if (broke):
+                break 
+        for updownline in unique:
+             # if blue token on same updown line as another token, remove token from tokens
+            r1, q1 = updownline
+            
+            # add up 1-6 times, if equals another token, remove blue
+            for i in range(1,7):
+                if (r + i*1 ==r1) and (q +i*-1 ==q1) and (blue !=updownline):
+                    tokens.remove(blue)
+                    broke = True
+                    break
+            if (broke):
+                break
+        
+    # end up with token amount = amount of distinct lines
+    num_lines = len(tokens)
+    return 1.5*num_lines 
+    print(num_lines)
+
+
 def coloured_token_pos(board: dict[tuple, tuple], colour = 'r'):
     pos = []
     for token in board:
@@ -236,7 +274,7 @@ def a_star(board: dict[tuple, tuple], list_red_pos):
             new_position = move(curr_node.board, new_action[0], new_action[1])
             new_board = spread(curr_node.board, new_action[0], new_action[1])
             new_child_node = Node(curr_node, new_action, new_board, nodecount)
-            new_child_node.h = calc_heuristics(curr_node.board, new_action)
+            new_child_node.h = calc_heuristics1(curr_node.board, new_action)
             children.append(new_child_node)
         
 
